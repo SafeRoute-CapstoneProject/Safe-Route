@@ -1,0 +1,9 @@
+# Sprint 2 Data Catalog – Safe Route Planning (Coamo, Orocovis, Lares)
+
+| Dataset | Purpose | Geography | Source URL | Format / CRS | Update Freq | License | Retrieval Method | Preprocess Steps | Known Gaps | Owner | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| OpenStreetMap – Roads | Routing graph (edges/nodes, road class) | Coamo, Orocovis, Lares | https://download.geofabrik.de/north-america/us/puerto-rico.html | GeoPackage / EPSG:4326 | Weekly | ODbL | Download Geofabrik PR `.osm.pbf` OR use OSMnx API | Clip to municipio, keep drivable, fix geometry | Missing maxspeed on some roads | Dinesh | Planned |
+| FEMA NFHL – Flood Zones | Hazard overlay for edge penalty | Coamo, Orocovis, Lares | https://msc.fema.gov/nfhl | Shapefile/GeoJSON / EPSG:4326 | Periodic updates | Public | Download flood hazard shapefile bundle | Clip to municipio, dissolve by zone | Different update dates by county | Kaustubh | Planned |
+| NOAA Sea Level Rise Viewer | Coastal inundation scenarios | Coamo, Orocovis, Lares | https://coast.noaa.gov/slrdata/ | Raster/Polygon / EPSG:4326 | Static scenarios | Public | Export from NOAA SLR Viewer | Clip to municipio, convert raster→vector if needed | Coastal only; scenario-based | Kaustubh | Planned |
+| USGS 3DEP – DEM | Elevation/slope (optional risk factor) | Coamo, Orocovis, Lares | https://apps.nationalmap.gov/downloader/ | GeoTIFF / EPSG:4326 or UTM | Stable | Public Domain | Download DEM tiles via National Map | Clip to municipio, derive slope raster | Resolution varies (10–30m) | Charan | Planned |
+| Census TIGER – Municipios | AOI boundaries (clipping mask) | Coamo, Orocovis, Lares | https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html | GeoJSON / EPSG:4326 | Annual | Public | Download TIGER/Line shapefile → filter municipios | Filter `NAME` = Coamo, Orocovis, Lares | Rare boundary changes | Susmitha | Downloaded |
