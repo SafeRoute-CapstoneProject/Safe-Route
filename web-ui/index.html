@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Blockage Reporter</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Leaflet for map display -->
+    <!-- Google Maps script moved to bottom -->
+</head>
+<body>
+    <!-- Loading indicator -->
+    <div class="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+        <div style="border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
+    </div>
+    
+    <!-- Success/Error messages -->
+    <div id="successMessage" style="display: none; position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 15px; border-radius: 5px; z-index: 9999;"></div>
+    <div id="errorMessage" style="display: none; position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 15px; border-radius: 5px; z-index: 9999;"></div>
+    
+    <div class="container">
+        <header>
+            <h1>🚧 Road Blockage Reporter</h1>
+            <p>Google Maps powered blockage reporting system</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Map Section -->
+            <div class="map-section">
+                <h2>Select Blockage Location</h2>
+                <div class="search-container">
+                    <input type="text" id="locationSearch" placeholder="🔍 Search for a location or click on map..." autocomplete="off">
+                    <div id="searchSuggestions" class="suggestions-dropdown"></div>
+                </div>
+                <div id="map"></div>
+                <p class="help-text">Search for a location or click on the map to set blockage location</p>
+            </div>
+
+            <!-- Form Section -->
+            <div class="form-section">
+                <h2>Blockage Details</h2>
+                <form id="blockageForm">
+                    <div class="form-group">
+                        <label for="latitude">Latitude:</label>
+                        <input type="number" id="latitude" step="any" readonly required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="longitude">Longitude:</label>
+                        <input type="number" id="longitude" step="any" readonly required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="radius">Affected Radius (meters):</label>
+                        <input type="number" id="radius" value="100" min="10" max="1000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" rows="3" placeholder="E.g., Construction work, Accident, Flooded road"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="severity">Severity:</label>
+                        <select id="severity" required>
+                            <option value="low">Low - Minor delay</option>
+                            <option value="medium" selected>Medium - Moderate delay</option>
+                            <option value="high">High - Road closed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration">Duration (hours):</label>
+                        <input type="number" id="duration" value="2" min="0.5" max="72" step="0.5">
+                        <small>Leave at 0 for indefinite</small>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">Report Blockage</button>
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                    </div>
+                </form>
+
+                <div id="status" class="status-message"></div>
+            </div>
+        </div>
+
+        <!-- Active Blockages List -->
+        <div class="blockages-section">
+            <h2>Active Blockages</h2>
+            <button class="btn btn-refresh" onclick="loadBlockages()">🔄 Refresh</button>
+            <div id="blockagesList"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5QKVqarebJ12MQm6iw5sypU1lP-G1TRE&libraries=places,drawing&callback=initializeMap"></script>
+</body>
+</html>
+

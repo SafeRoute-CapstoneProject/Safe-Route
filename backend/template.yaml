@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Routing Application with Road Blockage Management
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs18.x
+    Environment:
+      Variables:
+        DYNAMODB_TABLE_NAME: !Ref RoadBlockagesTable
+        ROUTE_CALCULATOR_NAME: MyRouteCalculator
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+
+Resources:
+  # DynamoDB Table for storing road blockages
+  RoadBlockagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: RoadBlockages
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: blockageId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: blockageId
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  # API Gateway
+  RoutingApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+
+  # Lambda Function: Add Road Blockage
+  AddRoadBlockageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/addRoadBlockage/
+      Handler: index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RoadBlockagesTable
+      Events:
+        AddBlockage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RoutingApi
+            Path: /blockages
+            Method: POST
+
+  # Lambda Function: Get Road Blockages
+  GetRoadBlockagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/getRoadBlockages/
+      Handler: index.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref RoadBlockagesTable
+      Events:
+        GetBlockages:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RoutingApi
+            Path: /blockages
+            Method: GET
+
+  # Lambda Function: Delete Road Blockage
+  DeleteRoadBlockageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/deleteRoadBlockage/
+      Handler: index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RoadBlockagesTable
+      Events:
+        DeleteBlockage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RoutingApi
+            Path: /blockages/{blockageId}
+            Method: DELETE
+
+  # Lambda Function: Calculate Route
+  CalculateRouteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/calculateRoute/
+      Handler: index.handler
+      Environment:
+        Variables:
+          HERE_API_KEY: o_A9nq4o_w9Xkempjm2jmPH3kO5lI1YywvSvFo6omXo
+          TABLE_NAME: !Ref RoadBlockagesTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref RoadBlockagesTable
+        - Statement:
+          - Effect: Allow
+            Action:
+              - geo:CalculateRoute
+            Resource: '*'
+      Events:
+        CalculateRoute:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RoutingApi
+            Path: /calculate-route
+            Method: POST
+
+  # Lambda Function: Search Places
+  SearchPlacesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/searchPlaces/
+      Handler: index.handler
+      Environment:
+        Variables:
+          GOOGLE_API_KEY: AIzaSyC5QKVqarebJ12MQm6iw5sypU1lP-G1TRE
+      Events:
+        SearchPlaces:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RoutingApi
+            Path: /search-places
+            Method: POST
+
+Outputs:
+  ApiEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${RoutingApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  
+  DynamoDBTableName:
+    Description: "DynamoDB table name for road blockages"
+    Value: !Ref RoadBlockagesTable
+
+
