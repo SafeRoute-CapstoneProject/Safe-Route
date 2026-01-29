@@ -218,5 +218,6 @@ For issues or questions, check:
 
 ---
 
-**Built with ❤️ using HERE Maps, Google Places, and AWS**
+**Built using HERE Maps, Google Places, and AWS**
+
 
